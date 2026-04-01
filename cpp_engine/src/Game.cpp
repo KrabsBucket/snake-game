@@ -2,9 +2,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <thread>
+#include "../include/algorithms/Hamiltonian.h"
 
 
-Game::Game(int rows, int cols)
+Game::Game(int rows, int cols, bool use_ham)
 {
     this->rows = rows;
     this->cols = cols;
@@ -15,6 +16,9 @@ Game::Game(int rows, int cols)
     dir_c = 1;
 
     grid.resize(rows, std::vector<int>(cols, 0));
+    hamiltonian.generate(rows,cols);
+
+    hamiltonian_enabled = use_ham;
 }
 
 void Game::render()
@@ -61,6 +65,25 @@ void Game::render()
             }
         std::cout << "\n";
     }
+}
+void Game::hamiltonian_move()
+{
+    int current_r = snake[0].first;
+    int current_c = snake[0].second;
+
+    std::pair<int, int> next_step = hamiltonian.next(current_r, current_c);
+
+  
+    dir_r = next_step.first - current_r;
+    dir_c = next_step.second - current_c;
+}
+
+
+
+
+bool Game::is_hamiltonian() 
+{
+    return hamiltonian_enabled;
 }
 
 

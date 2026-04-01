@@ -3,9 +3,10 @@ project(SnakeGame)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 include_directories(cpp_engine/include)
 
-file(GLOB SOURCES
+file(GLOB_RECURSE SOURCES
     cpp_engine/src/*.cpp
 )
 
