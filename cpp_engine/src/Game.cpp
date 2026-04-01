@@ -2,13 +2,15 @@
 #include <iostream>
 #include <cstdlib>
 #include <thread>
-#include "../include/algorithms/Hamiltonian.h"
 
 
-Game::Game(int rows, int cols, bool use_ham)
+
+Game::Game(int rows, int cols, std::shared_ptr<PathSolver> solver)
 {
     this->rows = rows;
     this->cols = cols;
+    this->path_solver = solver;
+    this->solver_active = true;
     snake =  {{rows/2, cols/2}};
     food_r = rand()%rows;
     food_c = rand()%cols;
@@ -16,10 +18,35 @@ Game::Game(int rows, int cols, bool use_ham)
     dir_c = 1;
 
     grid.resize(rows, std::vector<int>(cols, 0));
-    hamiltonian.generate(rows,cols);
 
-    hamiltonian_enabled = use_ham;
 }
+
+void Game::toggle_pathsolver() { solver_active = !solver_active; }
+bool Game::is_solver_active() { return solver_active && path_solver != nullptr; }
+
+bool Game::is_hamiltonian() {
+    return path_solver != nullptr; 
+}
+
+void Game::hamiltonian_move()
+{
+    if (path_solver == nullptr) 
+    {
+        return;
+    }
+
+    int current_r = snake[0].first;
+    int current_c = snake[0].second;
+
+    std::vector<std::pair<int, int>> path = path_solver->solve(grid, {current_r, current_c}, {food_r, food_c});
+
+    if (!path.empty())
+    {
+        dir_r = path[0].first - current_r;
+        dir_c = path[0].second - current_c;
+    }
+}
+
 
 void Game::render()
 {
@@ -66,25 +93,11 @@ void Game::render()
         std::cout << "\n";
     }
 }
-void Game::hamiltonian_move()
-{
-    int current_r = snake[0].first;
-    int current_c = snake[0].second;
-
-    std::pair<int, int> next_step = hamiltonian.next(current_r, current_c);
-
-  
-    dir_r = next_step.first - current_r;
-    dir_c = next_step.second - current_c;
-}
 
 
 
 
-bool Game::is_hamiltonian() 
-{
-    return hamiltonian_enabled;
-}
+
 
 
 void Game::step()
@@ -124,7 +137,6 @@ void Game::step()
 
 
 }
-
 
 
 

@@ -1,9 +1,11 @@
-#include "algorithms/Hamiltonian.h"
+#include "../../include/algorithms/Hamiltonian.h"
 #include <iostream>
 #include <cstdlib>
 #include <thread>
 #include <math.h>
-
+Hamiltonian::Hamiltonian(int r, int c) {
+    generate(r, c); 
+}
 
 void Hamiltonian::generate(int r, int c)
 { // HAMILTONIAN IS ASSUMING THAT r = c, i.e it's a perfect square grid as well as both are even
@@ -34,18 +36,21 @@ void Hamiltonian::generate(int r, int c)
         }
     }
 }
-    std::pair<int, int> Hamiltonian::next(int r, int c)
+std::vector<std::pair<int,int>> Hamiltonian::solve(
+    const std::vector<std::vector<int>>& grid, 
+    std::pair<int,int> start, 
+    std::pair<int,int> target)
 {
-    for (int i = 0; i < cycle.size(); i++)
+    for (size_t i = 0; i < cycle.size(); i++)
     {
-        if (cycle[i].first == r && cycle[i].second == c)
+        if (cycle[i].first == start.first && cycle[i].second == start.second)
         {
-            int next_index = (i + 1) % cycle.size();
-            return cycle[next_index];
+            size_t next_index = (i + 1) % cycle.size();
+            return { cycle[next_index] };
         }
     }
 
-    return {r, c}; 
+    return { start }; 
 }
 
 
