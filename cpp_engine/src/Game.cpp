@@ -3,177 +3,155 @@
 #include <cstdlib>
 #include <thread>
 
-
-
 Game::Game(int rows, int cols, std::shared_ptr<PathSolver> solver)
+    : rows(rows),
+      cols(cols),
+      path_solver(solver),
+      snake(rows/2, cols/2),
+      grid_obj(rows, cols)
 {
-    this->rows = rows;
-    this->cols = cols;
-    this->path_solver = solver;
-    this->solver_active = true;
-    snake =  {{rows/2, cols/2}};
-    food_r = rand()%rows;
-    food_c = rand()%cols;
+    food_r = rand() % rows;
+    food_c = rand() % cols;
+
     dir_r = 0;
     dir_c = 1;
-
-    grid.resize(rows, std::vector<int>(cols, 0));
-
 }
 
-void Game::toggle_pathsolver() { solver_active = !solver_active; }
-bool Game::is_solver_active() { return solver_active && path_solver != nullptr; }
-
-bool Game::is_hamiltonian() {
-    return path_solver != nullptr; 
-}
-
-void Game::hamiltonian_move()
+void Game::solver_move()
 {
-    if (path_solver == nullptr) 
+    if (!path_solver) return;
+
+    static std::vector<std::pair<int, int>> saved_path;
+    static std::pair<int, int> last_target = {-1, -1};
+
+    auto head = snake.body[0];
+    std::pair<int, int> current_target = {food_r, food_c};
+
+
+    if (saved_path.empty() || last_target != current_target)
     {
-        return;
+        grid_obj.bake(snake);
+        saved_path = path_solver->solve(grid_obj.get_data(), head, current_target);
+        last_target = current_target;
+
+        // Remove the starting head position so we don't try to move into ourselves
+        if (!saved_path.empty() && saved_path.front() == head) {
+            saved_path.erase(saved_path.begin());
+        }
     }
 
-    int current_r = snake[0].first;
-    int current_c = snake[0].second;
-
-    std::vector<std::pair<int, int>> path = path_solver->solve(grid, {current_r, current_c}, {food_r, food_c});
-
-    if (!path.empty())
+    if (!saved_path.empty())
     {
-        dir_r = path[0].first - current_r;
-        dir_c = path[0].second - current_c;
+        auto next_step = saved_path.front(); // Read the next move
+        saved_path.erase(saved_path.begin()); // Cross it out
+
+        dir_r = next_step.first - head.first;
+        dir_c = next_step.second - head.second;
     }
 }
-
 
 void Game::render()
 {
-
+    const auto& body = snake.body;
 
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
             bool flag = false;
-            if (i == snake[0].first && j == snake[0].second)
-                    {
-                        std::cout << "H ";
-                        flag = true;
-                    }
-            else if (i == snake.back().first && j == snake.back().second && snake.size()>1)
-                    {   std::cout << "T ";
-                        flag = true;
 
-                    }
-
-            else 
+            if (i == body[0].first && j == body[0].second)
             {
-                for (int k = 1; k < snake.size()-1 ; k++)
-                {    
-
-                    if ( i == snake[k].first && j == snake[k].second)
-                    {   
-                        std::cout << "B "; 
-                        flag = true; 
-                        break; 
+                std::cout << "H ";
+                flag = true;
+            }
+            else if (body.size() > 1 &&
+                     i == body.back().first &&
+                     j == body.back().second)
+            {
+                std::cout << "T ";
+                flag = true;
+            }
+            else
+            {
+                for (size_t k = 1; k < body.size() - 1; k++)
+                {
+                    if (i == body[k].first && j == body[k].second)
+                    {
+                        std::cout << "B ";
+                        flag = true;
+                        break;
                     }
-                        
                 }
             }
+
             if (!flag)
-            {    if ( i == food_r && j == food_c)
+            {
+                if (i == food_r && j == food_c)
                     std::cout << "F ";
-                        
                 else
-                    std::cout << ". ";}
-           
+                    std::cout << ". ";
             }
+        }
         std::cout << "\n";
     }
 }
 
-
-
-
-
-
-
 void Game::step()
 {
-    snake.insert(snake.begin(), {snake[0].first + dir_r, snake[0].second +dir_c});
+    auto head = snake.body[0];
+    int new_r = head.first + dir_r;
+    int new_c = head.second + dir_c;
 
-    
+    bool grow = (new_r == food_r && new_c == food_c);
+
+    snake.move(dir_r, dir_c, grow);
+
+    head = snake.body[0];
+
     bool gameover = false;
-    
-    if (snake[0].first  < 0 || snake[0].first  >= rows || snake[0].second < 0 || snake[0].second >= cols)
+
+    if (head.first < 0 || head.first >= rows ||
+        head.second < 0 || head.second >= cols)
         gameover = true;
 
-    for (int i = 1; i < snake.size(); i++)
+    for (size_t i = 1; i < snake.body.size(); i++)
     {
-        if (snake[i].first == snake[0].first && snake[i].second == snake[0].second)
+        if (snake.body[i] == head)
             gameover = true;
-
     }
 
     if (gameover)
-        {
-            std::cout << "GAME OVER\n";
-            exit(0);
-        }
+    {
+        std::cout << "GAME OVER\n";
+        exit(0);
+    }
 
-    
-    if (snake[0].first == food_r && snake[0].second == food_c)
-        {
-            food_r = rand() % rows;
-            food_c = rand() % cols;
-        }
-
-    else
-        {
-            snake.pop_back();
-        }
-
-
+    if (grow)
+    {
+        food_r = rand() % rows;
+        food_c = rand() % cols;
+    }
 }
-
-
 
 void Game::move(char input)
 {
-
-
-    
-
-
     input = std::tolower(input);
+
     if (input == 'w' && dir_r != 1)
-        {
-            dir_r = -1;
-            dir_c = 0;
-        }
-    else if ( input == 's' && dir_r != -1 )
-        {
-            dir_r = 1;
-            dir_c = 0;
-        }
-
-    else if ( input == 'a' && dir_c != 1 )
-        {
-            dir_r = 0;
-            dir_c = -1;
-        }
-
-
-    else if ( input == 'd' && dir_c != -1 )
-        {
-            dir_r = 0;
-            dir_c = 1;
-        }
-
-   
-        
-
-
+    {
+        dir_r = -1; dir_c = 0;
+    }
+    else if (input == 's' && dir_r != -1)
+    {
+        dir_r = 1; dir_c = 0;
+    }
+    else if (input == 'a' && dir_c != 1)
+    {
+        dir_r = 0; dir_c = -1;
+    }
+    else if (input == 'd' && dir_c != -1)
+    {
+        dir_r = 0; dir_c = 1;
+    }
 }

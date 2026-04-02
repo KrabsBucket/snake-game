@@ -1,5 +1,6 @@
 #include "../include/Game.h"
 #include "../include/algorithms/Hamiltonian.h"
+#include "../include/algorithms/DFS.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -8,24 +9,35 @@
 
 int main()
 {
-    std::cout << "\x1B[?25l"; 
+    std::cout << "\x1B[?25l";
+    
 
-    bool USE_HAMILTONIAN = true; 
+
+    enum Mode {
+        MANUAL,
+        HAMILTONIAN_MODE,
+        DFS_MODE
+    };
+    const int ROWS = 10;
+    const int COLS = 10;
+    const int speed = 10;
+    Mode mode = DFS_MODE;   
 
     std::shared_ptr<PathSolver> solver = nullptr;
-    if (USE_HAMILTONIAN)
-    {
-        solver = std::make_shared<Hamiltonian>(10, 10);
-    }
 
-    Game game(10, 10, solver);
+    if (mode == HAMILTONIAN_MODE)
+        solver = std::make_shared<Hamiltonian>(ROWS,COLS);
+    else if (mode == DFS_MODE)
+        solver = std::make_shared<DFS>(ROWS, COLS);
+
+    Game game(ROWS, COLS, solver);
 
     while(true)
     {
         if (_kbhit())
         {
             char ch = _getch();
-            
+
             if (solver == nullptr)
             {
                 game.move(ch);
@@ -34,15 +46,17 @@ int main()
 
         if (solver != nullptr)
         {
-            game.hamiltonian_move();
+            game.solver_move(); 
         }
 
         game.step();
+
         std::cout << "\x1B[H\x1B[J";
-        game.render();   
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        game.render();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(speed));
     }
-    
+
     std::cout << "\x1B[?25h";
     return 0;
 }

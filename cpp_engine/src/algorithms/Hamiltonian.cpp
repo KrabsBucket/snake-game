@@ -31,7 +31,7 @@ void Hamiltonian::generate(int r, int c)
         cycle.push_back({rows, cols});
         for (int j = 1; j < c-1; j++)
         {
-            cols += pow(-1,i);
+            cols += (i %2 == 0 ? 1 :-1) ;
             cycle.push_back({rows, cols });
         }
     }
