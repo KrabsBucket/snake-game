@@ -1,4 +1,4 @@
-#include "../../include/algorithms/DFS.h"
+#include "../../include/unweighted_algorithms/DFS.h"
 
 DFS::DFS(int r, int c) {
     this->rows = r;

@@ -1,4 +1,4 @@
-#include "../../include/algorithms/Hamiltonian.h"
+#include "../../include/unweighted_algorithms/Hamiltonian.h"
 #include <iostream>
 #include <cstdlib>
 #include <thread>

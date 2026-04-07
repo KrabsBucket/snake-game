@@ -1,4 +1,4 @@
-#include "../../include/algorithms/BFS.h"
+#include "../../include/unweighted_algorithms/BFS.h"
 #include <queue>     
 #include <map>      
 #include <algorithm> 

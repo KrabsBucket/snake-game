@@ -1,7 +1,7 @@
 #include "../include/Game.h"
-#include "../include/algorithms/Hamiltonian.h"
-#include "../include/algorithms/DFS.h"
-#include "../include/algorithms/BFS.h"
+#include "../include/unweighted_algorithms/Hamiltonian.h"
+#include "../include/unweighted_algorithms/DFS.h"
+#include "../include/unweighted_algorithms/BFS.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
