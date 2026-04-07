@@ -1,6 +1,7 @@
 #include "../include/Game.h"
 #include "../include/algorithms/Hamiltonian.h"
 #include "../include/algorithms/DFS.h"
+#include "../include/algorithms/BFS.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -16,12 +17,13 @@ int main()
     enum Mode {
         MANUAL,
         HAMILTONIAN_MODE,
-        DFS_MODE
+        DFS_MODE,
+        BFS_MODE
     };
     const int ROWS = 10;
     const int COLS = 10;
-    const int speed = 150;
-    Mode mode = DFS_MODE;   
+    const int speed = 10;
+    Mode mode = BFS_MODE;   
 
     std::shared_ptr<PathSolver> solver = nullptr;
 
@@ -29,6 +31,8 @@ int main()
         solver = std::make_shared<Hamiltonian>(ROWS,COLS);
     else if (mode == DFS_MODE)
         solver = std::make_shared<DFS>(ROWS, COLS);
+    else if (mode == BFS_MODE)
+        solver = std::make_shared<BFS>(ROWS, COLS);
 
     Game game(ROWS, COLS, solver);
 
