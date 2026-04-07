@@ -28,7 +28,6 @@ private:
 
     std::shared_ptr<PathSolver> path_solver;
 
-
     Snake snake;
     Grid grid_obj;
 };

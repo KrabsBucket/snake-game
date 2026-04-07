@@ -34,7 +34,7 @@ void Game::solver_move()
         saved_path = path_solver->solve(grid_obj.get_data(), head, current_target);
         last_target = current_target;
 
-        // Remove the starting head position so we don't try to move into ourselves
+        
         if (!saved_path.empty() && saved_path.front() == head) {
             saved_path.erase(saved_path.begin());
         }
@@ -42,8 +42,8 @@ void Game::solver_move()
 
     if (!saved_path.empty())
     {
-        auto next_step = saved_path.front(); // Read the next move
-        saved_path.erase(saved_path.begin()); // Cross it out
+        auto next_step = saved_path.front(); 
+        saved_path.erase(saved_path.begin()); 
 
         dir_r = next_step.first - head.first;
         dir_c = next_step.second - head.second;

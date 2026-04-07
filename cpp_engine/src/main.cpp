@@ -20,7 +20,7 @@ int main()
     };
     const int ROWS = 10;
     const int COLS = 10;
-    const int speed = 10;
+    const int speed = 150;
     Mode mode = DFS_MODE;   
 
     std::shared_ptr<PathSolver> solver = nullptr;

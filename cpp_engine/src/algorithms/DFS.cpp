@@ -11,7 +11,7 @@ bool DFS::find_path(int r, int c, std::pair<int,int> target,
                     std::vector<std::pair<int,int>>& path) {
     if (r < 0 || r >= rows || c < 0 || c >= cols) return false;
 
-    if ((grid[r][c] == 1) && !visited[r][c])
+    if ((grid[r][c] != -1) && !visited[r][c])
     {
         path.push_back({r,c});
         visited[r][c] = true;
